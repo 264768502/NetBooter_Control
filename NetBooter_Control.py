@@ -7,7 +7,7 @@ import serial
 
 import telnetlib
 
-import httplib
+import http.client as httplib
 import base64
 import string
 
@@ -71,7 +71,7 @@ class NetBooter_Control:
             self.NetBooter_telnet = telnetlib.Telnet(self.ip)
         elif self.mode == 'http':
             self.ip = ip
-            self.auth = base64.encodestring('%s:%s' % (self.id, self.password)).replace('\n', '')
+            self.auth = base64.encodestring(('%s:%s' % (self.id, self.password)).encode()).decode().strip()
             self.NetBooter_httpconnection = httplib.HTTPConnection(self.ip,timeout=10)
         self.__check_netbooter__()
 
@@ -106,7 +106,7 @@ class NetBooter_Control:
                 self.NetBooter_httpconnection.putheader("Authorization", "Basic %s" % self.auth)
                 self.NetBooter_httpconnection.endheaders()
                 response = self.NetBooter_httpconnection.getresponse()
-                res = response.read()
+                res = response.read().decode('utf-8')
             except Exception as e:
                 raise Exception('['+os.path.basename(__file__)+']['+sys._getframe().f_code.co_name+'] Init http connection to NetBooter fail: '+str(e))
             if response.status != 200:
@@ -430,7 +430,7 @@ class NetBooter_Control:
             self.NetBooter_httpconnection.putheader("Authorization", "Basic %s" % self.auth)
             self.NetBooter_httpconnection.endheaders()
             response = self.NetBooter_httpconnection.getresponse()
-            res = response.read()
+            res = response.read().decode('utf-8')
         except Exception as e:
             return 'Exception','['+os.path.basename(__file__)+']['+sys._getframe().f_code.co_name+']'+str(e)
         if response.status != 200:
